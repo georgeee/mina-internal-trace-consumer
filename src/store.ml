@@ -779,8 +779,15 @@ let add_block_trace_checkpoint block_trace_id is_main source call_id checkpoint
 
 let add_block_trace_checkpoint block_trace_id is_main source call_id checkpoint
     =
-  Connection_context.use_current
-    (add_block_trace_checkpoint block_trace_id is_main source call_id checkpoint)
+  let name =
+  ( match checkpoint with
+   | `Checkpoint (name, time) -> sprintf "%s %f" name time
+   | `Control (name, _) -> sprintf "control %s" name ) in
+  eprintf "add_block_trace_checkpoint: adding %s\n%!" name ;
+  let r = Connection_context.use_current
+    (add_block_trace_checkpoint block_trace_id is_main source call_id checkpoint) in
+  eprintf "add_block_trace_checkpoint: added %s\n%!" name ;
+  r
 
 let get_block_trace_checkpoints ~main_trace block_trace_id
     (module Db : Caqti_async.CONNECTION) =
