@@ -360,12 +360,16 @@ module Main_handler = struct
     return ()
 
   let start_file_processing_iteration = function
-    | `Sqlite -> Connection_context.start ()
-    | `Postgres -> Deferred.unit
+    | `Sqlite ->
+        Connection_context.start ()
+    | `Postgres ->
+        Deferred.unit
 
   let complete_file_processing_iteration = function
-    | `Sqlite -> Connection_context.commit ()
-    | `Postgres -> Deferred.unit
+    | `Sqlite ->
+        Connection_context.commit ()
+    | `Postgres ->
+        Deferred.unit
 end
 
 module Prover_handler = struct
@@ -508,7 +512,7 @@ let serve =
          Graphql_server.create_graphql_server
            ~bind_to_address:
              Tcp.Bind_to_address.(
-               if insecure_rest_server then All_addresses else Localhost )
+               if insecure_rest_server then All_addresses else Localhost)
            ~schema:Graphql_server.schema ~server_description:"GraphQL server"
            port
        in

@@ -334,7 +334,7 @@ module Q = struct
     in
     let rep =
       Caqti_type.(
-        tup3 (tup3 float float float) (tup4 string int int string) string )
+        tup3 (tup3 float float float) (tup4 string int int string) string)
     in
     custom ~encode ~decode rep
 
@@ -366,7 +366,7 @@ module Q = struct
     in
     let rep =
       Caqti_type.(
-        tup4 string (tup4 string int int string) (tup2 float float) string )
+        tup4 string (tup4 string int int string) (tup2 float float) string)
     in
     custom ~encode ~decode rep
 
@@ -394,7 +394,8 @@ module Q = struct
         | "P" ->
             `Prover
         | _ ->
-            `Main (* TODO print warning *)
+            `Main
+        (* TODO print warning *)
       in
       (* TODO: print warning on metadata decoding failure or fail row decoding *)
       let checkpoint =
@@ -415,9 +416,9 @@ module Q = struct
     let primary_key_int, json_type =
       match engine with
       | `Sqlite ->
-          "integer PRIMARY KEY AUTOINCREMENT", "text"
+          ("integer PRIMARY KEY AUTOINCREMENT", "text")
       | `Postgres ->
-          "SERIAL PRIMARY KEY", "jsonb"
+          ("SERIAL PRIMARY KEY", "jsonb")
     in
     [ (unit ->. unit)
       @@ sprintf
@@ -780,12 +781,18 @@ let add_block_trace_checkpoint block_trace_id is_main source call_id checkpoint
 let add_block_trace_checkpoint block_trace_id is_main source call_id checkpoint
     =
   let name =
-  ( match checkpoint with
-   | `Checkpoint (name, time) -> sprintf "%s %f" name time
-   | `Control (name, _) -> sprintf "control %s" name ) in
+    match checkpoint with
+    | `Checkpoint (name, time) ->
+        sprintf "%s %f" name time
+    | `Control (name, _) ->
+        sprintf "control %s" name
+  in
   eprintf "add_block_trace_checkpoint: adding %s\n%!" name ;
-  let r = Connection_context.use_current
-    (add_block_trace_checkpoint block_trace_id is_main source call_id checkpoint) in
+  let r =
+    Connection_context.use_current
+      (add_block_trace_checkpoint block_trace_id is_main source call_id
+         checkpoint )
+  in
   eprintf "add_block_trace_checkpoint: added %s\n%!" name ;
   r
 

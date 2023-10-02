@@ -15,9 +15,11 @@ module Make (Handler : sig
 
   val eof_reached : unit -> unit Deferred.t
 
-  val start_file_processing_iteration : [ `Postgres | `Sqlite ] -> unit Deferred.t
+  val start_file_processing_iteration :
+    [ `Postgres | `Sqlite ] -> unit Deferred.t
 
-  val complete_file_processing_iteration : [ `Postgres | `Sqlite ] -> unit Deferred.t
+  val complete_file_processing_iteration :
+    [ `Postgres | `Sqlite ] -> unit Deferred.t
 end) =
 struct
   let last_rotate_end_timestamp = ref 0.0

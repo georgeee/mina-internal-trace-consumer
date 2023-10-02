@@ -44,7 +44,8 @@ let block_source_from_string = function
   | "Unknown" ->
       `Unknown
   | _other ->
-      `Unknown (* TODO: print warning*)
+      `Unknown
+(* TODO: print warning*)
 
 let status_to_yojson = Util.flatten_yojson_variant status_to_yojson
 
@@ -59,7 +60,8 @@ let status_from_string = function
   | "Success" ->
       `Success
   | _ ->
-      `Pending (* TODO: warning *)
+      `Pending
+(* TODO: warning *)
 
 type t =
   { source : block_source

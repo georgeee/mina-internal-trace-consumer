@@ -222,7 +222,7 @@ let create_graphql_server ~bind_to_address ~schema ~server_description port =
                 respond_with_cors "Route not found" `Not_found >>| lift )
         | `Other _ ->
             respond_with_cors "HTTP method not supported" `Method_not_allowed
-            >>| lift ) )
+            >>| lift ))
   |> Deferred.map ~f:(fun _ ->
          Log.Global.info "Created %s at: http://localhost:%i/graphql"
            server_description port )
