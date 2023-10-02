@@ -788,7 +788,7 @@ let add_block_trace_checkpoint block_trace_id is_main source call_id checkpoint
         sprintf "control %s" name
   in
   eprintf "add_block_trace_checkpoint: adding %s\n%!" name ;
-  let r =
+  let%map r =
     Connection_context.use_current
       (add_block_trace_checkpoint block_trace_id is_main source call_id
          checkpoint )

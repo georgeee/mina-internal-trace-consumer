@@ -527,7 +527,9 @@ let serve =
            Main_trace_processor.process_roated_files main_trace_file_path
          else Deferred.unit
        in
-       let%bind () = Main_trace_processor.process_file main_trace_file_path
+       let%bind () =
+         Main_trace_processor.process_file main_trace_file_path
+         >>| fun () -> eprintf "main trace file processed\n"
        and () =
          let%bind () = Main_handler.synced () in
          let%bind () =

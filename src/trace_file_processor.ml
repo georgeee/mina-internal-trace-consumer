@@ -113,10 +113,12 @@ struct
   let rec process_reader_loop ~inode ~stop_on_eof ~rotated ~filename reader =
     let%bind result =
       Connection_context.with_connection (fun engine ->
+          eprintf "Start file processing of %s\n" filename ;
           let%bind () = Handler.start_file_processing_iteration engine in
           let%bind result =
             process_reader ~inode ~stop_on_eof ~rotated ~filename reader
           in
+          eprintf "Complete file processing of %s\n" filename ;
           let%bind () = Handler.complete_file_processing_iteration engine in
           return (Ok result) )
     in
