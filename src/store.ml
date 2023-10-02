@@ -740,13 +740,21 @@ let get_block_traces block_id (module Db : Caqti_async.CONNECTION) =
   Db.collect_list Q.select_block_traces block_id
 
 let get_block_traces block_id =
-  Connection_context.use_current (get_block_traces block_id)
+  eprintf "get_block_traces: querying %s\n" block_id ;
+  let%map r = Connection_context.use_current (get_block_traces block_id) in
+  eprintf "get_block_traces: done %s\n" block_id ;
+  r
 
 let get_block_trace_by_id block_trace_id (module Db : Caqti_async.CONNECTION) =
   Db.find Q.select_block_trace block_trace_id
 
 let get_block_trace_by_id block_trace_id =
-  Connection_context.use_current (get_block_trace_by_id block_trace_id)
+  eprintf "get_block_trace_by_id: querying %d\n" block_trace_id ;
+  let%map r =
+    Connection_context.use_current (get_block_trace_by_id block_trace_id)
+  in
+  eprintf "get_block_trace_by_id: done %d\n" block_trace_id ;
+  r
 
 let get_block_trace_info_entries ?(max_length = 10_000) ?(offset = 0) ?height
     ?global_slot ?(chain_length = 1) ?(order = `Asc)
@@ -769,9 +777,25 @@ let get_block_trace_info_entries ?(max_length = 10_000) ?(offset = 0) ?height
 
 let get_block_trace_info_entries ?max_length ?offset ?height ?global_slot
     ?chain_length ?order () =
-  Connection_context.use_current
-    (get_block_trace_info_entries ?max_length ?offset ?height ?global_slot
-       ?chain_length ?order )
+  let cons_f f v ls = f v :: ls in
+  let add_opt ~f opt = Option.value_map ~default:ident ~f:(cons_f f) opt in
+  let descr = add_opt ~f:(sprintf "max_length=%d") max_length [] in
+  let descr = add_opt ~f:(sprintf "offset=%d") offset descr in
+  let descr = add_opt ~f:(sprintf "height=%d") height descr in
+  let descr = add_opt ~f:(sprintf "global_slot=%d") global_slot descr in
+  let descr = add_opt ~f:(sprintf "chain_length=%d") chain_length descr in
+  let descr =
+    add_opt ~f:(function `Asc -> "asc" | `Desc -> "desc") order descr
+  in
+  let descr = String.concat ~sep:", " descr in
+  eprintf "get_block_trace_info_entries: querying %s\n%!" descr ;
+  let%map r =
+    Connection_context.use_current
+      (get_block_trace_info_entries ?max_length ?offset ?height ?global_slot
+         ?chain_length ?order )
+  in
+  eprintf "get_block_trace_info_entries: done %s\n%!" descr ;
+  r
 
 let add_block_trace_checkpoint block_trace_id is_main source call_id checkpoint
     (module Db : Caqti_async.CONNECTION) =
@@ -801,8 +825,13 @@ let get_block_trace_checkpoints ~main_trace block_trace_id
   Db.collect_list Q.select_block_trace_checkpoints (block_trace_id, main_trace)
 
 let get_block_trace_checkpoints ~main_trace block_trace_id =
-  Connection_context.use_current
-    (get_block_trace_checkpoints ~main_trace block_trace_id)
+  eprintf "get_block_trace_checkpoints: querying %d\n%!" block_trace_id ;
+  let%map r =
+    Connection_context.use_current
+      (get_block_trace_checkpoints ~main_trace block_trace_id)
+  in
+  eprintf "get_block_trace_checkpoints: done %d\n%!" block_trace_id ;
+  r
 
 let update_block_trace_block_id block_trace_id block_id
     (module Db : Caqti_async.CONNECTION) =
