@@ -889,6 +889,6 @@ module Testing = struct
            | Ok pool ->
                pool
          in
-         Connection_context.Db.set pool ;
+         Connection_context.Db.set `Sqlite pool ;
          test_db () >>= report_error )
 end

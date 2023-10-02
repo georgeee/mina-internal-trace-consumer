@@ -359,9 +359,13 @@ module Main_handler = struct
     Ivar.fill_if_empty main_trace_synced () ;
     return ()
 
-  let start_file_processing_iteration () = Connection_context.start ()
+  let start_file_processing_iteration = function
+    | `Sqlite -> Connection_context.start ()
+    | `Postgres -> Deferred.unit
 
-  let complete_file_processing_iteration () = Connection_context.commit ()
+  let complete_file_processing_iteration = function
+    | `Sqlite -> Connection_context.commit ()
+    | `Postgres -> Deferred.unit
 end
 
 module Prover_handler = struct
@@ -386,9 +390,9 @@ module Prover_handler = struct
 
   let eof_reached () = Deferred.unit (* Nothing to do *)
 
-  let start_file_processing_iteration () = Deferred.unit
+  let start_file_processing_iteration _ = Deferred.unit
 
-  let complete_file_processing_iteration () = Deferred.unit
+  let complete_file_processing_iteration _ = Deferred.unit
 end
 
 module Verifier_handler = struct
@@ -413,9 +417,9 @@ module Verifier_handler = struct
 
   let eof_reached () = Deferred.unit (* Nothing to do *)
 
-  let start_file_processing_iteration () = Deferred.unit
+  let start_file_processing_iteration _ = Deferred.unit
 
-  let complete_file_processing_iteration () = Deferred.unit
+  let complete_file_processing_iteration _ = Deferred.unit
 end
 
 module Main_trace_processor = Trace_file_processor.Make (Main_handler)
@@ -495,7 +499,7 @@ let serve =
      fun () ->
        let db_uri, engine = compute_engine_and_uri ~db_path ~db_uri in
        let%bind pool = open_database_or_fail db_uri in
-       Connection_context.Db.set pool ;
+       Connection_context.Db.set engine pool ;
        let%bind result = Store.initialize_database engine in
        let%bind () = abort_on_error result in
        let insecure_rest_server = true in
@@ -562,7 +566,7 @@ let process =
      fun () ->
        let db_uri, engine = compute_engine_and_uri ~db_path ~db_uri in
        let%bind pool = open_database_or_fail db_uri in
-       Connection_context.Db.set pool ;
+       Connection_context.Db.set engine pool ;
        let%bind result = Store.initialize_database engine in
        let%bind () = abort_on_error result in
        Log.Global.info "Consuming main trace events from file: %s"

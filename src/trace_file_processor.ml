@@ -15,9 +15,9 @@ module Make (Handler : sig
 
   val eof_reached : unit -> unit Deferred.t
 
-  val start_file_processing_iteration : unit -> unit Deferred.t
+  val start_file_processing_iteration : [ `Postgres | `Sqlite ] -> unit Deferred.t
 
-  val complete_file_processing_iteration : unit -> unit Deferred.t
+  val complete_file_processing_iteration : [ `Postgres | `Sqlite ] -> unit Deferred.t
 end) =
 struct
   let last_rotate_end_timestamp = ref 0.0
@@ -110,12 +110,12 @@ struct
 
   let rec process_reader_loop ~inode ~stop_on_eof ~rotated ~filename reader =
     let%bind result =
-      Connection_context.with_connection (fun () ->
-          let%bind () = Handler.start_file_processing_iteration () in
+      Connection_context.with_connection (fun engine ->
+          let%bind () = Handler.start_file_processing_iteration engine in
           let%bind result =
             process_reader ~inode ~stop_on_eof ~rotated ~filename reader
           in
-          let%bind () = Handler.complete_file_processing_iteration () in
+          let%bind () = Handler.complete_file_processing_iteration engine in
           return (Ok result) )
     in
     match result with
